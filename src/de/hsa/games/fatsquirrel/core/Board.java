@@ -91,7 +91,7 @@ public class Board {
         }
     }
 
-    private XY getRandomPosition(boolean[][] isOccupied) {
+    public XY getRandomPosition(boolean[][] isOccupied) {
         int row = Game.getRandom().nextInt(config.getSize().getX());
         int col = Game.getRandom().nextInt(config.getSize().getY());
         while (isOccupied[row][col]) {

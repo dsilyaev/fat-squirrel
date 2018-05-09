@@ -98,36 +98,184 @@ public class FlattenedBoard implements BoardView, EntityContext {
 
     @Override
     public void tryMove(MasterSquirrel masterSquirrel, XY moveDirection) {
+        XY test = moveDirection.getRandomVector();
+        masterSquirrel.setPosition(test);
+        resolveActiveCollision(masterSquirrel);
+
 
     }
 
     @Override
     public void tryMove(MiniSquirrel miniSquirrel, XY moveDirection) {
+        XY test = moveDirection.getRandomVector();
+        miniSquirrel.setPosition(test);
+        resolveActiveCollision(miniSquirrel);
 
     }
 
     @Override
     public void tryMove(GoodBeast goodBeast, XY moveDirection) {
 
+            XY test = moveDirection.getRandomVector();
+            goodBeast.setPosition(test);
+            resolvePassiveCollision(goodBeast);
+            if(goodBeast.getPosition() == goodBeast.getPreviousPosition()){
+
+            }
+            else{
+                goodBeast.setPosition(goodBeast.getPreviousPosition());
+                goodBeast.nextStep(test);
+            }
+
     }
 
     @Override
     public void tryMove(BadBeast badBeast, XY moveDirection) {
+        XY test = moveDirection.getRandomVector();
+        badBeast.setPosition(test);
+        resolvePassiveCollision(badBeast);
+        if(badBeast.getPosition() == badBeast.getPreviousPosition()){
 
-    }
+        }
+        else{
+            badBeast.setPosition(badBeast.getPreviousPosition());
+            badBeast.nextStep(test);
+        }
 
-    @Override
-    public PlayerEntity nearestPlayerEntity(XY position) {
-        return null;
     }
 
     @Override
     public void kill(Entity entity) {
+        for(int i = 0; i < board.getEntitySet().getSize(); i++){
+            if(entity.getPosition().equals(board.getEntitySet().get(i).getPosition())){
+                board.getEntitySet().remove(i);
+                break;
+            }
+        }
 
     }
 
     @Override
     public void killAndReplace(Entity entity) {
+        for(int i = 0; i < board.getEntitySet().getSize(); i++){
+            if(entity.getPosition().equals(board.getEntitySet().get(i).getPosition())){
+                board.getEntitySet().remove(i);
+                int id = (int)entity.getId();
+                boolean[][] isOccupied = new boolean[board.getConfig().getSize().getX()][board.getConfig().getSize().getY()];
+                XY position = board.getRandomPosition(isOccupied);
+             if(entity instanceof BadBeast){
+                 entity = new BadBeast(id ,entity.getEnergy(), position);
+                 break;
+             }
+             else if(entity instanceof BadPlant){
+                 entity = new BadPlant(id ,entity.getEnergy(), position);
+                 break;
+             }
+             else if(entity instanceof GoodPlant){
+                 entity = new GoodPlant(id ,entity.getEnergy(), position);
+                 break;
+             }
+             else if(entity instanceof GoodBeast){
+                 entity = new GoodBeast(id ,entity.getEnergy(), position);
+                 break;
+             }
+
+
+
+            }
+        }
+
+
+    }
+
+
+    public void resolvePassiveCollision(Beast beast){
+
+        for(int i = 0;i <board.getEntitySet().getSize(); i++) {
+
+            if (beast.equals(board.getEntitySet().get(i))) {
+                i++;
+            }
+            Entity entity = board.getEntitySet().get(i);
+            if (beast.getPosition().equals(entity.getPosition()) && (entity instanceof Beast || entity instanceof Plant || entity instanceof Wall)) {
+                beast.setPosition(beast.getPreviousPosition());
+                break;
+            }
+        }
+
+
+                /*lse if((entity instanceof GoodBeast || entity instanceof GoodPlant) && (entity1 instanceof BadBeast || entity1 instanceof BadPlant) && entity.getPosition().equals(entity1.getPosition())){
+                    entity1.updateEnergy(-entity.getEnergy());
+                    entitySet.remove(i);
+                }else if((entity instanceof BadBeast || entity instanceof BadPlant) && (entity1 instanceof GoodBeast || entity1 instanceof GoodPlant) && entity.getPosition().equals(entity1.getPosition())){
+                    entity.updateEnergy(-entity1.getEnergy());
+                    entitySet.remove(j);
+                }else if((entity instanceof Beast && entity1 instanceof Wall ) && entity.getPosition().equals(entity1.getPosition())){
+                    entity.setPosition(((Beast) entity).getPreviousPosition());
+                }*/
+
+
+            }
+
+    public void resolveActiveCollision(Squirrel squirrel) {
+        for (int i = 0; i < board.getEntitySet().getSize(); i++) {
+            Entity entity = board.getEntitySet().get(i);
+            if (isSquirrelAlive(squirrel)) {
+                if ((entity instanceof Plant || entity instanceof Beast) && squirrel.getPosition().equals(entity.getPosition())) {
+                    squirrel.updateEnergy(entity.getEnergy());
+                    if((entity.getBite() > 0) && (entity instanceof BadBeast) ){
+                        int bite = entity.getBite();
+                        entity.setBite(bite--);
+                       break;
+                    }
+                    killAndReplace(entity);
+                    break;
+                } else if (entity instanceof Wall && squirrel.getPosition().equals(entity.getPosition())) {
+                    // Maybe call a method to print out smth like : "Oh it is a wall, you are not ready to travel to another dimension"
+                    squirrel.setPosition(squirrel.getPreviousPosition());
+                    squirrel.setAwake(3);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean isSquirrelAlive(Squirrel squirrel){
+        if(squirrel.getEnergy() > 0)
+            return true;
+        else
+            return false;
+    }
+
+    private boolean locateNearSquirrel(BadBeast badBeast){
+
+        for(int i = 6; i >= -6; i--){
+            int x = badBeast.getPosition().getX() + i;
+            for(int j = 6; j >= -6; j--){
+                int y = badBeast.getPosition().getY() + i;
+                if(checkEntity(gameField, x,y)){
+                 return true;
+
+                }
+            }
+
+
+        }
+        return false;
+    }
+    private boolean checkEntity(Entity[][] gameField, int x, int y){
+        if(gameField[x][y] instanceof MasterSquirrel){
+            return true;
+        }
+
+    }
+    private boolean checkMonsterBites(BadBeast badbeast){
+        if(badbeast.getBite() > 0 ){
+            return false;
+        }
+        else{
+            return true;
+        }
 
     }
 }

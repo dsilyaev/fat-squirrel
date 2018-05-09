@@ -2,12 +2,13 @@ package de.hsa.games.fatsquirrel.entities;
 
 import de.hsa.games.fatsquirrel.core.XY;
 
-public class MasterSquirrel extends PlayerEntity {
+public class MasterSquirrel extends Squirrel {
     public static final int STARTING_ENERGY = 1000;
-
+    private XY previousPosition = getPosition();
     public MasterSquirrel(int id, int energy, XY position) {
         super(id, energy, position);
     }
+
 
     public boolean isOwned(Entity entity) {
         return (entity instanceof MiniSquirrel)
@@ -23,5 +24,13 @@ public class MasterSquirrel extends PlayerEntity {
         }
         updateEnergy(-energy);
         return new MiniSquirrel(id, energy, getPosition(), this);
+    }
+
+    public void setPreviousPosition(XY previousPosition) {
+        this.previousPosition = previousPosition;
+    }
+
+    public XY getPreviousPosition() {
+        return previousPosition;
     }
 }

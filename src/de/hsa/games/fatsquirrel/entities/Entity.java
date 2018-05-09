@@ -6,9 +6,10 @@ import de.hsa.games.fatsquirrel.core.XY;
 import java.util.Objects;
 
 public abstract class Entity {
-    private final int id;
+    private final long id;
     private int energy;
     private XY position;
+    private int bite;
 
     protected Entity(int id, int energy, XY position) {
         this.id = id;
@@ -16,7 +17,7 @@ public abstract class Entity {
         this.position = position;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -35,6 +36,8 @@ public abstract class Entity {
     public void updateEnergy(int delta) {
         energy += delta;
     }
+
+
 
     @Override
     public String toString() {
@@ -58,4 +61,11 @@ public abstract class Entity {
     }
 
     public abstract void nextStep(EntitySet entities);
+    public int getBite() {
+        return bite;
+    }
+
+    public void setBite(int bite) {
+        this.bite = bite;
+    }
 }
